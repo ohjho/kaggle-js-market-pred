@@ -19,6 +19,8 @@ def get_train_df(filepath, min_weight = None, min_resp = 0):
     train_dt = dt.fread(filepath)
     train_df = df_64bits_to_32bits(train_dt.to_pandas(), verbose= True)
     train_df.set_index('ts_id')
+    r_time = round(time.time() - s_time, 2)
+    print(f'df took {r_time} seconds to load')
 
     if min_weight and 'weight' in train_df.columns:
         print(f'{len(train_df)} trades in raw trainset')
@@ -47,7 +49,7 @@ def get_ts_dataloader(df, window_length = 100, target_col = 'action',
         num_workers: number of CPUs to use
         batch_size: train & validation batch size
     '''
-    feat_cols = [col for col in train_df.columns if 'feature' in col]
+    feat_cols = [col for col in df.columns if 'feature' in col]
     X, y = SlidingWindow( window_length= window_length,
             get_x = feat_cols, get_y= target_col)(df)
     itemify(X,y)
