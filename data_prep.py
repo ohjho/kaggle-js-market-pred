@@ -5,8 +5,8 @@ import datatable as dt
 
 from tsai.all import *
 # [optional] print setup
-print('''
-    TimeSeries AI setup:\n
+print(f'''
+    TimeSeries AI setup:
     tsai       :{tsai.__version__}\n
     fastai     :{fastai.__version__}\n
     fastcore   :{fastcore.__version__}\n
