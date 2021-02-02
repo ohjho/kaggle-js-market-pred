@@ -8,9 +8,9 @@ from tsai.all import *
 import tsai
 print(f'''
     TimeSeries AI setup:
-    tsai       :{tsai.__version__}\n
-    fastai     :{fastai.__version__}\n
-    fastcore   :{fastcore.__version__}\n
+    tsai       :{tsai.__version__}
+    fastai     :{fastai.__version__}
+    fastcore   :{fastcore.__version__}
     torch      :{torch.__version__}
     ''')
 
@@ -39,6 +39,7 @@ def get_train_df(filepath, min_weight = None, min_resp = 0):
     # Target Definition
     if 'resp' in train_df.columns:
         train_df['action'] = (train_df['resp']> min_resp).astype('int')
+        print(f'actionable trades pct: {round(train_df["action"].sum()/len(train_df),2)}')
     return train_df
 
 def ts_df_split(df, validate_pct = 0.3, verbose = False):
@@ -53,17 +54,18 @@ def ts_df_split(df, validate_pct = 0.3, verbose = False):
         ''')
     return df[:split_point], df[split_point:]
 
-def get_ts_dataloader(df, window_length = 100, target_col = 'action',
+def get_ts_dataloader(df, window_length = 100, target_col = 'action', stride = None,
         num_workers = 2, batch_size = [64,128], valid_size = 0.3):
     '''
     transform a df (2d multivariant) into a tsai dataloader
     Args:
         window_length: number of past trades per sample
+        stride: If None, stride=window_len (no overlap)
         num_workers: number of CPUs to use
         batch_size: train & validation batch size
     '''
     feat_cols = [col for col in df.columns if 'feature' in col]
-    X, y = SlidingWindow( window_length= window_length,
+    X, y = SlidingWindow( window_length= window_length, stride = stride,
             get_x = feat_cols, get_y= target_col)(df)
     itemify(X,y)
     sample_count, feat_count, obs_per_sample = X.shape
