@@ -4,6 +4,14 @@ import numpy as np
 import datatable as dt
 
 from tsai.all import *
+# [optional] print setup
+print('''
+    TimeSeries AI setup:\n
+    tsai       :{tsai.__version__}\n
+    fastai     :{fastai.__version__}\n
+    fastcore   :{fastcore.__version__}\n
+    torch      :{torch.__version__}
+    ''')
 
 def df_64bits_to_32bits(df, verbose = False):
     if verbose:
@@ -32,12 +40,16 @@ def get_train_df(filepath, min_weight = None, min_resp = 0):
         train_df['action'] = (train_df['resp']> min_resp).astype('int')
     return train_df
 
-def ts_df_split(df, validate_pct = 0.3):
+def ts_df_split(df, validate_pct = 0.3, verbose = False):
     '''
     split a time-series df (must be already ordered by index)
     and return two df's
     '''
     split_point = int(len(df) * (1-validate_pct))
+    if verbose:
+        print(f'''
+        Split ratio: {split_point}, {len(df)-split_point}
+        ''')
     return df[:split_point], df[split_point:]
 
 def get_ts_dataloader(df, window_length = 100, target_col = 'action',
@@ -55,11 +67,11 @@ def get_ts_dataloader(df, window_length = 100, target_col = 'action',
     itemify(X,y)
     sample_count, feat_count, obs_per_sample = X.shape
     print(f'''
-    Turned a DF of shape {df[feat_cols].shape} into a 3D dataset of:\n
-    * {sample_count} samples \n
-    * with {feat_count} features \n
-    * and {obs_per_sample} observations per sample
-    ''')
+        Turned a DF of shape {df[feat_cols].shape} into a 3D dataset of:\n
+        * {sample_count} samples \n
+        * with {feat_count} features \n
+        * and {obs_per_sample} observations per sample
+        ''')
 
     splits = get_splits(y, valid_size= valid_size, stratify= True,
         random_state = 420, shuffle= False)
