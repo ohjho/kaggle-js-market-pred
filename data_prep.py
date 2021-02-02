@@ -5,6 +5,7 @@ import datatable as dt
 
 from tsai.all import *
 # [optional] print setup
+import tsai
 print(f'''
     TimeSeries AI setup:
     tsai       :{tsai.__version__}\n
