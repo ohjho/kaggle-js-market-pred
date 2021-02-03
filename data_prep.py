@@ -34,7 +34,8 @@ def get_train_df(filepath, min_weight = None, min_resp = 0, dropna = True):
     if dropna:
         len_with_na = len(train_df)
         train_df = train_df.dropna(axis = 0)
-        print(f'{len_with_na - len(train_df)} rows with NA values dropped.')
+        print(f'{round(len_with_na / len(train_df),2)*100}% of rows with NA values dropped.')
+
     if min_weight and 'weight' in train_df.columns:
         print(f'{len(train_df)} trades in raw trainset')
         train_df = train_df[train_df['weight']> min_weight]
