@@ -98,7 +98,8 @@ def ts_df_split(df, validate_pct = 0.3, verbose = False):
 
 def get_ts_dataloader(df, window_length = 100, target_col = 'action', stride = None,
         num_workers = 2, batch_size = [64,128], valid_size = 0.3,
-        tfms = [None, Categorize()], batch_tfms = [TSStandardize(by_sample = True)]
+        tfms = [None, Categorize()], batch_tfms = [TSStandardize(by_sample = True)],
+        drop_last = False, shuffle_train = False
         ):
     '''
     transform a df (2d multivariant) into a tsai dataloader
@@ -122,13 +123,13 @@ def get_ts_dataloader(df, window_length = 100, target_col = 'action', stride = N
 
     splits = get_splits(y, valid_size= valid_size, stratify= True,
         random_state = 420, shuffle= False)
-    # tfms = [None, [Categorize()]]
-    # dsets = TSDatasets(X, y, tfms=tfms, splits=splits, inplace=True)
-    # dls   = TSDataLoaders.from_dsets(dsets.train, dsets.valid,
-    #             bs= batch_size, batch_tfms=[TSStandardize()],
-    #             num_workers= num_workers)
-    dls = get_ts_dls(X, y, splits = splits, tfms = tfms,
-            drop_last = False, shuffle_train = False,
-            batch_tfms = batch_tfms, bs = batch_size
-            )
+    dsets = TSDatasets(X, y, tfms=tfms, splits=splits, inplace=True)
+    dls   = TSDataLoaders.from_dsets(dsets.train, dsets.valid,
+                bs= batch_size, batch_tfms=[TSStandardize()],
+                num_workers= num_workers, drop_last = drop_last, shuffle_train = shuffle_train)
+
+    # dls = get_ts_dls(X, y, splits = splits, tfms = tfms,
+    #         drop_last = False, shuffle_train = False,
+    #         batch_tfms = batch_tfms, bs = batch_size
+    #         )
     return dls
