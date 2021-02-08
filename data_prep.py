@@ -80,7 +80,7 @@ def get_train_df(filepath, min_weight = None, min_resp = 0,
         print(f'{round(1-(len(train_df)/len_with_na),2)*100}% of rows with NA values dropped.')
     elif fillna_method:
         s_time = time.time()
-        train_df = train_df.fillna(method = 'ffill')
+        train_df = train_df.fillna(method = fillna_method).fillna(0)
         r_time = round(time.time() - s_time, 2)
         print(f'{fillna_method} took {r_time} seconds to run')
 
