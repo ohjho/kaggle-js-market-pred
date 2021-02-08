@@ -59,11 +59,17 @@ def reduce_memory_usage(df):
     print(f"Reduced by {100 * (start_memory - end_memory) / start_memory} % ")
     return df
 
-def get_train_df(filepath, min_weight = None, min_resp = 0, dropna = True):
+def get_train_df(filepath, min_weight = None, min_resp = 0,
+    dropna = False, fillna_method = 'ffill', reduce_mem = False):
+    '''
+    Args:
+        fillna_method: 'ffill' means forward fill (i.e. use last observation)
+    '''
     s_time = time.time()
     train_dt = dt.fread(filepath)
     #train_df = df_64bits_to_32bits(train_dt.to_pandas(), verbose= True)
-    train_df = reduce_memory_usage(train_dt.to_pandas())
+    # train_df = reduce_memory_usage(train_dt.to_pandas())
+    train_df = train_dt.to_pandas()
     train_df.set_index('ts_id')
     r_time = round(time.time() - s_time, 2)
     print(f'df took {r_time} seconds to load')
@@ -72,6 +78,11 @@ def get_train_df(filepath, min_weight = None, min_resp = 0, dropna = True):
         len_with_na = len(train_df)
         train_df = train_df.dropna(axis = 0)
         print(f'{round(1-(len(train_df)/len_with_na),2)*100}% of rows with NA values dropped.')
+    elif fillna_method:
+        s_time = time.time()
+        train_df = train_df.fillna(method = 'ffill')
+        r_time = round(time.time() - s_time, 2)
+        print(f'{fillna_method} took {r_time} seconds to run')
 
     if min_weight and 'weight' in train_df.columns:
         print(f'{len(train_df)} trades in raw trainset')
@@ -82,7 +93,8 @@ def get_train_df(filepath, min_weight = None, min_resp = 0, dropna = True):
     if 'resp' in train_df.columns:
         train_df['action'] = (train_df['resp']> min_resp).astype('int')
         print(f'actionable trades pct: {round((train_df["action"].sum()/len(train_df))*100,2)}')
-    return train_df
+
+    return reduce_memory_usage(train_df) if reduce_mem else train_df
 
 def ts_df_split(df, validate_pct = 0.3, verbose = False):
     '''
